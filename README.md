@@ -1,6 +1,6 @@
-$$
-G_{N} \in (\mathbb{R}^3)^{m \times n} \\
-$$
+今までAIにいっぱい甘えてきたからAIをほとんど使わないでやろう!!!!!のやつです
 
-$$
-v_{i,j} \in G_{N}
+現状AI使ったところ:
+```
+from autograd.autodiff import _expr, _render_expr, _literal_expr, _display_node, _simplified_node,  _is_literal, _is_literal_value, _is_const, _same_expression, simplify, _needs_parentheses
+```

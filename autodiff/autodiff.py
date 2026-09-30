@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from enum import Enum, auto
 
@@ -83,14 +85,14 @@ class ComputeLayer:
         return out
 
 
-class Node[T]:
+class Node:
     def __init__(self, value, parents=(), backward= None, *,
         op=None,
         name=None,
         op_data=None
     ):
-        self.data: T = value
-        self.grad: np.ndarray = 0.0
+        self.data = np.asarray(value)
+        self.grad = np.zeros_like(self.data, dtype=float)
         self.parents: tuple[Node] = tuple(parents)
         self._backward: callable = backward or (lambda grad: ())
 
@@ -116,7 +118,11 @@ class Node[T]:
             parent_grads = node._backward(node_grad)
 
             for parent, parent_grad in zip(node.parents, parent_grads):
-                parent.grad += parent_grad.data
+                grad_data = self._sum_to_shape(
+                    parent_grad.data,
+                    parent.data.shape
+                )
+                parent.grad += grad_data
 
     def diff(self, wrt: 'Node', grad=1.0) -> 'Node':
         topo_order = self._topo()
@@ -309,6 +315,17 @@ class Node[T]:
             op=OpKind.FUNCTION,
             op_data="ReLU",
         )(self)
+
+    def _sum_to_shape(self, grad: np.ndarray, shape: tuple[int, ...]):
+        grad = np.asarray(grad)
+
+        while grad.ndim > len(shape):
+            grad = grad.sum(axis=0)
+
+        for axis, original_size in enumerate(shape):
+            if original_size == 1 and grad.shape[axis] != 1:
+                grad = grad.sum(axis=axis, keepdims=True)
+        return grad
 
     def _expr(self, parent_op=None, side=None):
         """Render the graph with only presentation-level cleanup applied."""

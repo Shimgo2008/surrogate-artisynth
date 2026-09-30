@@ -1,5 +1,5 @@
 import numpy as np
-from autograd import Node
+from autodiff import Node
 
 
 class MulchParseptron:
@@ -27,6 +27,7 @@ class MulchParseptron:
     def forward(self, x: np.ndarray) -> np.ndarray:
         # hidden
         for i in range(len(self.hidden_layers)):
+            # "Input operand 1 has a missmatch in its core dimension 0"を回避するためにescape処理
             x = self.weights[i] @ x + self.biases[i]
             x = self.activator(x)
 

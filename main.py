@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from autograd import Node, D
+from autodiff import Node, D
 
 
 e = Node(np.e)
